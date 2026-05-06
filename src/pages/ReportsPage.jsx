@@ -24,7 +24,11 @@ export default function ReportsPage() {
     setSchools(sc || []);
   };
 
-  useEffect(() => { load(); const interval = setInterval(load, 30000); return () => clearInterval(interval); }, []);
+  useEffect(() => {
+    load();
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const save = async () => {
     setSaving(true);
@@ -38,9 +42,9 @@ export default function ReportsPage() {
   function buildChartData(ds) {
     return DAYS.map(day => {
       const entry = { day };
-      ['วัดดอนไก่ดี', 'วัดท่าพูด', 'พระตำหนักฯ'].forEach(school => {
-        const found = ds.find(d => d.day_of_week === day && d.school_name?.includes(school.replace('ฯ', '')));
-        entry[school] = found?.is_submitted ? (found.total_revenue || 0) : 0;
+      ['วัดดอนไก่ดี', 'วัดท่าพูด', 'พระตำหนักฯ'].forEach(schoolName => {
+        const found = ds.find(d => d.day_of_week === day && d.school_name && d.school_name.includes(schoolName.replace('ฯ', '')));
+        entry[schoolName] = found && found.is_submitted ? (found.total_revenue || 0) : 0;
       });
       return entry;
     });
@@ -52,30 +56,35 @@ export default function ReportsPage() {
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `daily_sales_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'daily_sales_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
   };
 
   const printReport = () => {
     const totalRevenue = dailySales.filter(d => d.is_submitted).reduce((s, d) => s + (d.total_revenue || 0), 0);
     const totalOrders = dailySales.filter(d => d.is_submitted).reduce((s, d) => s + (d.total_orders || 0), 0);
     const win = window.open('', '_blank', 'width=700,height=800');
-    win.document.write(`
-      <html><head><title>รายงานยอดขาย</title>
-      <style>body{font-family:sans-serif;padding:24px;font-size:13px}h1{font-size:18px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f0f0f0}.total{font-weight:bold;font-size:15px}</style></head>
-      <body>
-        <h1>🍦 MO ICE CREAM — รายงานยอดขายรายวัน</h1>
-        <p>พิมพ์: ${new Date().toLocaleDateString('th-TH')} | ทั้งหมด ${dailySales.length} วัน</p>
-        <hr/>
-        <table>
-          <thead><tr><th>วันที่</th><th>วัน</th><th>สาขา</th><th>รายได้</th><th>ออเดอร์</th><th>สถานะ</th></tr></thead>
-          <tbody>
-            ${dailySales.map(d => `<tr><td>${d.date}</td><td>${d.day_of_week}</td><td>${d.school_name}</td><td>฿${d.total_revenue?.toLocaleString()}</td><td>${d.total_orders}</td><td>${d.is_submitted ? '✓ บันทึกแล้ว' : '⏳ รอ'}</td></tr>`).join('')}
-          </tbody>
-        </table>
-        <br/><div class="total">รวมรายได้ทั้งหมด: ฿${totalRevenue.toLocaleString()} | รวม ${totalOrders} ออเดอร์</div>
-      </body></html>
-    `);
-    win.document.close(); win.print(); win.close();
+    win.document.write(
+      '<html><head><title>รายงานยอดขาย</title>' +
+      '<style>body{font-family:sans-serif;padding:24px;font-size:13px}h1{font-size:18px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f0f0f0}.total{font-weight:bold;font-size:15px}</style></head>' +
+      '<body>' +
+      '<h1>🍦 MO ICE CREAM — รายงานยอดขายรายวัน</h1>' +
+      '<p>พิมพ์: ' + new Date().toLocaleDateString('th-TH') + ' | ทั้งหมด ' + dailySales.length + ' วัน</p>' +
+      '<hr/>' +
+      '<table>' +
+      '<thead><tr><th>วันที่</th><th>วัน</th><th>สาขา</th><th>รายได้</th><th>ออเดอร์</th><th>สถานะ</th></tr></thead>' +
+      '<tbody>' +
+      dailySales.map(d => '<tr><td>' + d.date + '</td><td>' + d.day_of_week + '</td><td>' + d.school_name + '</td><td>฿' + (d.total_revenue ? d.total_revenue.toLocaleString() : 0) + '</td><td>' + d.total_orders + '</td><td>' + (d.is_submitted ? '✓ บันทึกแล้ว' : '⏳ รอ') + '</td></tr>').join('') +
+      '</tbody>' +
+      '</table>' +
+      '<br/><div class="total">รวมรายได้ทั้งหมด: ฿' + totalRevenue.toLocaleString() + ' | รวม ' + totalOrders + ' ออเดอร์</div>' +
+      '</body></html>'
+    );
+    win.document.close();
+    win.print();
+    win.close();
   };
 
   const chartData = buildChartData(dailySales);
@@ -93,7 +102,11 @@ export default function ReportsPage() {
           <button onClick={printReport} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-blue-300 whitespace-nowrap" style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)' }}>
             <FileText className="w-3.5 h-3.5 shrink-0" /> PDF
           </button>
-          <button onClick={() => setForm({ ...EMPTY_DS, school_id: school?.id || '', school_name: school?.name || '' })} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white whitespace-nowrap" style={{ background: `linear-gradient(135deg, ${accent}, rgba(255,107,26,0.7))` }}>
+          <button
+            onClick={() => setForm({ ...EMPTY_DS, school_id: school ? school.id : '', school_name: school ? school.name : '' })}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white whitespace-nowrap"
+            style={{ background: 'linear-gradient(135deg, ' + accent + ', rgba(255,107,26,0.7))' }}
+          >
             <Plus className="w-3.5 h-3.5 shrink-0" /> บันทึกยอดขาย
           </button>
         </div>
@@ -106,15 +119,20 @@ export default function ReportsPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4 mb-5">
         {[
-          ['รายได้รวม (บันทึกแล้ว)', `฿${dailySales.filter(d => d.is_submitted).reduce((s,d) => s + (d.total_revenue || 0), 0).toLocaleString()}`, '#4ade80'],
-          ['ออเดอร์รวม', dailySales.filter(d => d.is_submitted).reduce((s,d) => s + (d.total_orders || 0), 0).toLocaleString() + ' รายการ', '#00d4ff'],
+          ['รายได้รวม (บันทึกแล้ว)', '฿' + dailySales.filter(d => d.is_submitted).reduce((s, d) => s + (d.total_revenue || 0), 0).toLocaleString(), '#4ade80'],
+          ['ออเดอร์รวม', dailySales.filter(d => d.is_submitted).reduce((s, d) => s + (d.total_orders || 0), 0).toLocaleString() + ' รายการ', '#00d4ff'],
           ['วันที่บันทึก', dailySales.filter(d => d.is_submitted).length + ' วัน', '#facc15'],
-        ].map(([label, val, color]) => (
-          <div key={label} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p className="text-xs text-white/40 mb-1">{label}</p>
-            <p className="text-lg font-bold" style={{ color }}>{val}</p>
-          </div>
-        ))}
+        ].map(function(item) {
+          const label = item[0];
+          const val = item[1];
+          const color = item[2];
+          return (
+            <div key={label} className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <p className="text-xs text-white/40 mb-1">{label}</p>
+              <p className="text-lg font-bold" style={{ color: color }}>{val}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Table */}
@@ -133,7 +151,7 @@ export default function ReportsPage() {
                 <td className="px-4 py-3 text-xs text-white/60">{d.date}</td>
                 <td className="px-4 py-3 text-xs text-white/60">{d.day_of_week}</td>
                 <td className="px-4 py-3 text-xs text-white/70">{d.school_name}</td>
-                <td className="px-4 py-3 text-sm font-bold" style={{ color: accent }}>฿{d.total_revenue?.toLocaleString()}</td>
+                <td className="px-4 py-3 text-sm font-bold" style={{ color: accent }}>฿{d.total_revenue ? d.total_revenue.toLocaleString() : 0}</td>
                 <td className="px-4 py-3 text-xs text-white/60">{d.total_orders} รายการ</td>
                 <td className="px-4 py-3">
                   <span className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: d.is_submitted ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)', color: d.is_submitted ? '#4ade80' : '#f87171' }}>
@@ -145,7 +163,11 @@ export default function ReportsPage() {
                 </td>
               </tr>
             ))}
-            {dailySales.length === 0 && <tr><td colSpan={7} className="text-center py-10 text-white/30 text-sm">ยังไม่มีข้อมูล</td></tr>}
+            {dailySales.length === 0 && (
+              <tr>
+                <td colSpan={7} className="text-center py-10 text-white/30 text-sm">ยังไม่มีข้อมูล</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -162,7 +184,15 @@ export default function ReportsPage() {
               {role === 'owner' && (
                 <div>
                   <label className="text-xs text-white/50 mb-1 block">สาขา</label>
-                  <select value={form.school_id} onChange={e => { const s = schools.find(s => s.id === e.target.value); setForm(p => ({ ...p, school_id: e.target.value, school_name: s?.name || '' })); }} className="w-full px-3 py-2 rounded-xl text-sm text-white focus:outline-none" style={{ background: '#0d1626', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}>
+                  <select
+                    value={form.school_id}
+                    onChange={e => {
+                      const s = schools.find(s => s.id === e.target.value);
+                      setForm(p => ({ ...p, school_id: e.target.value, school_name: s ? s.name : '' }));
+                    }}
+                    className="w-full px-3 py-2 rounded-xl text-sm text-white focus:outline-none"
+                    style={{ background: '#0d1626', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                  >
                     <option value="" style={{ background: '#0d1626' }}>-- เลือกสาขา --</option>
                     {schools.map(s => <option key={s.id} value={s.id} style={{ background: '#0d1626' }}>{s.name}</option>)}
                   </select>
@@ -174,18 +204,23 @@ export default function ReportsPage() {
               </div>
               <div>
                 <label className="text-xs text-white/50 mb-1 block">วัน (ภาษาไทย)</label>
-                <select value={form.day_of_week} onChange={e => setForm(p => ({ ...p, day_of_week: e.target.value }))} className="w-full px-3 py-2 rounded-xl text-sm text-white focus:outline-none" style={{ background: '#0d1626', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}>
+                <select
+                  value={form.day_of_week}
+                  onChange={e => setForm(p => ({ ...p, day_of_week: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-xl text-sm text-white focus:outline-none"
+                  style={{ background: '#0d1626', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                >
                   <option value="" style={{ background: '#0d1626' }}>-- เลือกวัน --</option>
                   {DAYS.map(d => <option key={d} value={d} style={{ background: '#0d1626' }}>{d}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-xs text-white/50 mb-1 block">ยอดรายได้รวม (฿)</label>
-                <input type="number" value={form.total_revenue} onChange={e => setForm(p => ({ ...p, total_revenue: +e.target.value }))} className="w-full px-3 py-2 rounded-xl text-sm text-white bg-transparent focus:outline-none" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }} />
+                <input type="number" value={form.total_revenue} onChange={e => setForm(p => ({ ...p, total_revenue: Number(e.target.value) }))} className="w-full px-3 py-2 rounded-xl text-sm text-white bg-transparent focus:outline-none" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }} />
               </div>
               <div>
                 <label className="text-xs text-white/50 mb-1 block">จำนวนออเดอร์</label>
-                <input type="number" value={form.total_orders} onChange={e => setForm(p => ({ ...p, total_orders: +e.target.value }))} className="w-full px-3 py-2 rounded-xl text-sm text-white bg-transparent focus:outline-none" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }} />
+                <input type="number" value={form.total_orders} onChange={e => setForm(p => ({ ...p, total_orders: Number(e.target.value) }))} className="w-full px-3 py-2 rounded-xl text-sm text-white bg-transparent focus:outline-none" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }} />
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.is_submitted} onChange={e => setForm(p => ({ ...p, is_submitted: e.target.checked }))} />
@@ -194,7 +229,12 @@ export default function ReportsPage() {
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={() => setForm(null)} className="flex-1 py-2.5 rounded-xl text-xs text-white/50" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>ยกเลิก</button>
-              <button onClick={save} disabled={saving} className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white" style={{ background: `linear-gradient(135deg, ${accent}, rgba(255,107,26,0.7))` }}>
+              <button
+                onClick={save}
+                disabled={saving}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, ' + accent + ', rgba(255,107,26,0.7))' }}
+              >
                 {saving ? 'กำลังบันทึก...' : 'บันทึก'}
               </button>
             </div>
