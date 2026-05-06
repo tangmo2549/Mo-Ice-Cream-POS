@@ -1,0 +1,33 @@
+{
+  "name": "PinCode",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string"
+    },
+    "school_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "admin",
+        "staff"
+      ]
+    },
+    "pin": {
+      "type": "string",
+      "description": "\u0e23\u0e2b\u0e31\u0e2a PIN 4 \u0e2b\u0e25\u0e31\u0e01"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "school_id",
+    "role",
+    "pin"
+  ]
+}

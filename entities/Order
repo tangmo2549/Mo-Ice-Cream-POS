@@ -1,0 +1,67 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "description": "\u0e23\u0e2b\u0e31\u0e2a\u0e42\u0e23\u0e07\u0e40\u0e23\u0e35\u0e22\u0e19"
+    },
+    "school_name": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "subtotal": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "total_amount": {
+      "type": "number"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "\u0e40\u0e07\u0e34\u0e19\u0e2a\u0e14",
+        "QR Code",
+        "\u0e42\u0e2d\u0e19\u0e40\u0e07\u0e34\u0e19"
+      ],
+      "default": "\u0e40\u0e07\u0e34\u0e19\u0e2a\u0e14"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "cancelled"
+      ],
+      "default": "completed"
+    },
+    "cashier_role": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "school_id",
+    "total_amount"
+  ]
+}

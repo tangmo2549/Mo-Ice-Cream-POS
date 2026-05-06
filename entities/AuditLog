@@ -1,0 +1,40 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string"
+    },
+    "school_name": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "login",
+        "logout",
+        "create_order",
+        "delete_order",
+        "edit_stock",
+        "edit_product"
+      ],
+      "description": "\u0e1b\u0e23\u0e30\u0e40\u0e20\u0e17\u0e01\u0e32\u0e23\u0e01\u0e23\u0e30\u0e17\u0e33"
+    },
+    "role": {
+      "type": "string",
+      "description": "\u0e1a\u0e17\u0e1a\u0e32\u0e17\u0e17\u0e35\u0e48\u0e17\u0e33"
+    },
+    "detail": {
+      "type": "string",
+      "description": "\u0e23\u0e32\u0e22\u0e25\u0e30\u0e40\u0e2d\u0e35\u0e22\u0e14"
+    },
+    "amount": {
+      "type": "number",
+      "description": "\u0e22\u0e2d\u0e14\u0e40\u0e07\u0e34\u0e19 (\u0e16\u0e49\u0e32\u0e21\u0e35)"
+    }
+  },
+  "required": [
+    "school_id",
+    "action"
+  ]
+}
