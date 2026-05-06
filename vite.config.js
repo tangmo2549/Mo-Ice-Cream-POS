@@ -2,11 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import base44 from "@base44/vite-plugin"
 
-// https://vite.dev/config/
 export default defineConfig({
   logLevel: 'error', 
-  // แก้ไขจาก './' เป็นชื่อโปรเจกต์ตามนี้ครับ
-  base: '/Mo-Ice-Cream-POS/', 
+  base: '/Mo-Ice-Cream-POS/', // ระบุชื่อโปรเจกต์เพื่อให้หาไฟล์ main.jsx เจอ
   plugins: [
     base44({
       legacySDKImports: process.env.BASE44_LEGACY_SDK_IMPORTS === 'true',
