@@ -5,8 +5,8 @@ import base44 from "@base44/vite-plugin"
 // https://vite.dev/config/
 export default defineConfig({
   logLevel: 'error', 
-  // แก้ไขบรรทัดข้างล่างนี้ให้เป็นตามนี้ครับ
-  base: './', 
+  // แก้ไขจาก './' เป็นชื่อโปรเจกต์ตามนี้ครับ
+  base: '/Mo-Ice-Cream-POS/', 
   plugins: [
     base44({
       legacySDKImports: process.env.BASE44_LEGACY_SDK_IMPORTS === 'true',
