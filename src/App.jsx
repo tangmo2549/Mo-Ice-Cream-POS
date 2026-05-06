@@ -23,7 +23,7 @@ import PackagingPage from './pages/PackagingPage';
 import AuditPage from './pages/AuditPage';
 
 // หน้าที่ไม่ต้องรอ auth — แสดงทันที
-const PUBLIC_PATHS = ['/', '/login', '/signin', '/register'];
+const isPublic = PUBLIC_PATHS.some(p => location.pathname === p);
 
 const AuthenticatedApp = () => {
   const location = useLocation();
